@@ -1,4 +1,8 @@
 
 
+There will give a cipherSuite and there will ask you to set this in the cluster
+
+vi /etc/kubernetes/manifest/apiserver.yaml
+
 - --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 - --tls-min-version=TLSVERSION12
