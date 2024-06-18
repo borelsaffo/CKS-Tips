@@ -5,9 +5,9 @@ For the CK exam here are the points and concepts to focus on:
 - create a pod and set up a serviceaccount
 - create a runtimeClass: runsc or gvisor
 - create a pod with the runtimeClass create
-- define cipherSuite at the cluster level (api-server and etcd)
-- Create network policies to block all traffic entering a namespace
--Create network policies to block all traffic leaving a namespace
+- define cipherSuite at the cluster level (api-server and etcd) TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, tlsversion:1.2
+- Create network policies to block all traffic entering a namespace testing
+- Create network policies to block all traffic leaving a namespace
 - activated auditing within the cluster (adapt the policy.yaml provided)
 - CIS Benchmarck with Kube-bench
 - used falco to detect abnormal behavior generating in a pod
