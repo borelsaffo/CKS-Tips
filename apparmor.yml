@@ -1,0 +1,60 @@
+# Apparmor est un module Linux qui permet de limiter les action qu'un pod peut réaliser
+
+aa-status    ----> pour afficher le status des profiles APparmor
+
+apparmor_parse  -r   /var/path-to-the-apparmorprofile
+
+aa-status
+
+
+ssh on node
+apparmor_parce   -r   /var/path-to-the-apparmorprofile
+systemctl apparmor restart
+aa-status
+
+
+modified the securityContext of the pod and add the profile
+or add the profil using annotaion
+
+#############exemple de profile
+#include <tunables/global>
+
+profile k8s-apparmor-example-deny-write flags=(attach_disconnected) {
+  #include <abstractions/base>
+
+  file,
+
+  # Deny all file writes.
+  deny /** w,
+}
+###################
+
+# load apparmor profil on pod using annotations
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-apparmor
+  annotations:
+    container.apparmor.security.beta.kubernetes.io/hello: localhost/k8s-apparmor-example-deny-write
+spec:
+  containers:
+  - name: hello
+    image: busybox:1.28
+    command: [ "sh", "-c", "echo 'Hello AppArmor!' && sleep 1h" ]
+
+
+# Load apparmor profil using securityContext
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-apparmor
+spec:
+  securityContext:
+    appArmorProfile: 
+      type: Localhost
+      localhostProfile: k8s-apparmor-example-deny-write
+  containers:
+  - name: hello
+    image: busybox:1.28
+    command: [ "sh", "-c", "echo 'Hello AppArmor!' && sleep 1h" ]

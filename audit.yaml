@@ -1,0 +1,31 @@
+
+
+Vi /etc/kubernetes/manafest/apiserver.yaml
+
+  - --audit-policy-file=/etc/kubernetes/audit-policy.yaml
+  - --audit-log-path=/var/log/kubernetes/audit/audit.log
+
+--audit-log-maxage : defined the maximum number of days to retain old audit log files
+--audit-log-maxbackup :  the maximum number of audit log files to retain
+--audit-log-maxsize : defines the maximum size in megabytes of the audit log file before it gets rotated
+
+
+  volumeMounts:
+  - mountPath: /etc/kubernetes/audit-policy.yaml
+    name: audit
+    readOnly: true
+  - mountPath: /var/log/kubernetes/audit/
+    name: audit-log
+    readOnly: false
+
+...
+volumes:
+- name: audit
+  hostPath:
+    path: /etc/kubernetes/audit-policy.yaml
+    type: File
+
+- name: audit-log
+  hostPath:
+    path: /var/log/kubernetes/audit/
+    type: DirectoryOrCreate    

@@ -1,0 +1,227 @@
+# API server : Fix all of the following violations that were found against the API-server:
+
+  Ensure that the  --autorization-mode is set to AllwaysAllow  --> 1.2.7
+  Ensure that the  --autorization-mode is set to Node          --> 1.2.8
+  Ensure that the  --autorization-mode is set to RBAC          --< 1.2.9
+
+
+# ETCD  : Fix all of the following violations that were found against the ETCD:
+ 
+   Ensure that the --client-cert-aut argument is set to true
+
+
+
+# KUBELET  : Fix all of the following violations that were found against the Kubelet:
+
+vi /var/lib/kubelet/conf.yaml
+
+  Ensure that the annonymous-auth argument is set to FALSE            --> 4.2.1
+  Ensure that the  --autorization-mode is not set to AllwaysAllow     --> 4.2.2
+  Use Webhook authetication/authorization where posible
+
+
+  systemctl restart kubelet
+   systemctl restart kubelet.service
+
+
+
+#  ############################################ Version2
+Version 2 : CIS Benchmark Kube-bench
+   You can switch the cluster/configuration context using the following command: [desk@cli] $kubectl config use-context dev Context: A CIS Benchmark tool was run against the kubeadm created cluster and found multiple issues that must be addressed. 
+
+   Task: Fix all issues via configuration and restart the affected components to ensure the new settings take effect.
+    Fix all of the following violations that were found against the API server:
+     1.2.7authorization-mode argument is not set to AlwaysAllow FAIL 
+     1.2.8 authorization-mode argument includes Node FAIL
+     1.2.7 authorization-mode argument includes RBAC FAIL 
+     
+     Fix all of the following violations that were found against the Kubelet:
+      4.2.1 Ensure that the anonymous-auth argumentis set to false FAIL 
+      4.2.2 authorization-mode argument is not set to AlwaysAllow FAIL 
+      (UseWebhookautumn/authz where possible) 
+      
+      Fix all of the following violations that were found against etcd: 
+      2.2 Ensure that the client-cert-auth argument is set to true
+
+AExplanation:
+worker1 $ vim /var/lib/kubelet/config.yaml
+anonymous:
+enabled: true #Delete this
+enabled: false #Replace by this
+authorization:
+mode: AlwaysAllow #Delete this
+mode: Webhook #Replace by this
+worker1 $ systemctl restart kubelet. # To reload kubelet config
+
+ssh to master1
+
+master1 $ vim /etc/kubernetes/manifests/kube-apiserver.yaml
+- -- authorization-mode=Node,RBAC
+
+master1 $ vim /etc/kubernetes/manifests/etcd.yaml
+- --client-cert-auth=true
+Explanation
+ssh to worker1
+worker1 $ vim /var/lib/kubelet/config.yaml
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+anonymous:
+enabled: true #Delete this
+enabled: false #Replace by this
+webhook:
+cacheTTL: 0s
+enabled: true
+x509:
+clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+mode: AlwaysAllow #Delete this
+mode: Webhook #Replace by this
+webhook:
+cacheAuthorizedTTL: 0s
+cacheUnauthorizedTTL: 0s
+cgroupDriver: systemd
+clusterDNS:
+- 10.96.0.10
+clusterDomain: cluster.local
+cpuManagerReconcilePeriod: 0s
+evictionPressureTransitionPeriod: 0s
+fileCheckFrequency: 0s
+healthzBindAddress: 127.0.0.1
+healthzPort: 10248
+httpCheckFrequency: 0s
+imageMinimumGCAge: 0s
+kind: KubeletConfiguration
+logging: {}
+nodeStatusReportFrequency: 0s
+nodeStatusUpdateFrequency: 0s
+resolvConf: /run/systemd/resolve/resolv.conf
+rotateCertificates: true
+runtimeRequestTimeout: 0s
+staticPodPath: /etc/kubernetes/manifests
+streamingConnectionIdleTimeout: 0s
+syncFrequency: 0s
+volumeStatsAggPeriod: 0s
+worker1 $ systemctl restart kubelet. # To reload kubelet config
+
+ssh to master1
+
+
+
+############################################ Version3
+
+Version
+
+
+Fix all issues via configuration and restart the affected components to ensure the new setting takes effect.
+
+Fix all of the following violations that were found against theAPI server:-
+
+a. Ensure that the RotateKubeletServerCertificate argument is set to true.
+
+b. Ensure that the admission control plugin PodSecurityPolicy is set.
+
+c. Ensure that the --kubelet-certificate-authority argument is set as appropriate.
+
+Fix all of the following violations that were found against theKubelet:-
+
+a. Ensure the --anonymous-auth argument is set to false.
+
+b. Ensure that the --authorization-mode argument is set to Webhook.
+
+Fix all of the following violations that were found against theETCD:-
+
+a. Ensure that the --auto-tls argument is not set to true
+
+b. Ensure that the --peer-auto-tls argument is not set to true
+
+Hint: Take the use of Tool Kube-Bench
+
+AExplanation:
+Fix all of the following violations that were found against theAPI server:-
+a. Ensure that the RotateKubeletServerCertificate argument is set to true.
+apiVersion: v1
+kind: Pod
+metadata:
+creationTimestamp: null
+labels:
+component: kubelet
+tier: control-plane
+name: kubelet
+namespace: kube-system
+spec:
+containers:
+- command:
+- kube-controller-manager
++ - --feature-gates=RotateKubeletServerCertificate=true
+image: gcr.io/google_containers/kubelet-amd64:v1.6.0
+livenessProbe:
+failureThreshold: 8
+httpGet:
+host: 127.0.0.1
+path: /healthz
+port: 6443
+scheme: HTTPS
+initialDelaySeconds: 15
+timeoutSeconds: 15
+name: kubelet
+resources:
+requests:
+cpu: 250m
+volumeMounts:
+- mountPath: /etc/kubernetes/
+name: k8s
+readOnly: true
+- mountPath: /etc/ssl/certs
+name: certs
+- mountPath: /etc/pki
+name: pki
+hostNetwork: true
+volumes:
+- hostPath:
+path: /etc/kubernetes
+name: k8s
+- hostPath:
+path: /etc/ssl/certs
+name: certs
+- hostPath:
+path: /etc/pki
+name: pki
+b. Ensure that the admission control plugin PodSecurityPolicy is set.
+audit: '/bin/ps -ef | grep $apiserverbin | grep -v grep'
+tests:
+test_items:
+- flag: '--enable-admission-plugins'
+compare:
+op: has
+value: 'PodSecurityPolicy'
+set: true
+remediation: |
+Follow the documentation and create Pod Security Policy objects as per your environment.
+Then, edit the API server pod specification file $apiserverconf
+on the master node and set the --enable-admission-plugins parameter to a
+value that includes PodSecurityPolicy :
+--enable-admission-plugins=...,PodSecurityPolicy,...
+Then restart the API Server.
+scored: true
+c. Ensure that the --kubelet-certificate-authority argument is set as appropriate.
+audit: '/bin/ps -ef | grep $apiserverbin | grep -v grep'
+tests:
+test_items:
+- flag: '--kubelet-certificate-authority'
+set: true
+remediation: |
+Follow the Kubernetes documentation and setup the TLS connection between the
+apiserver and kubelets. Then, edit the API server pod specification file
+$apiserverconf on the master node and set the --kubelet-certificate-authority
+parameter to the path to the cert file for the certificate authority.
+--kubelet-certificate-authority=<ca-string>
+scored: true
+Fix all of the following violations that were found against theETCD:-
+a. Ensure that the --auto-tls argument is not set to true
+Edit the etcd pod specification file $etcdconf on the master
+node and either remove the --auto-tls parameter or set it to false.
+--auto-tls=false
+b. Ensure that the --peer-auto-tls argument is not set to true
+Edit the etcd pod specification file $etcdconf on the master
+node and either remove the --peer-auto-tls parameter or set it to false.
+--peer-auto-tls=false

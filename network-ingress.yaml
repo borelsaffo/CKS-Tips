@@ -1,0 +1,21 @@
+# allow ingress trafic from all pod with specific label (environnement: testing) and  all pod in namespace testing
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-network-policy
+  namespace: staging
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          environnement: testing
+    - podSelector:
+        matchLabels:
+          environnement: testing
+
+  
+

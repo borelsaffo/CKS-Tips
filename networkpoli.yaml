@@ -1,0 +1,21 @@
+Create a network policy named allow-np, that allows pod in the namespace staging to connect to port 80 of other pods in the same namespace.
+
+Ensure that Network Policy:-
+
+1. Does not allow access to pod not listening on port 80.
+
+2. Does not allow access from Pods, not in namespace staging.
+
+AExplanation:
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+name: network-policy
+spec:
+podSelector: {} #selects all the pods in the namespace deployed
+policyTypes:
+- Ingress
+ingress:
+- ports: #in input traffic allowed only through 80 port only
+- protocol: TCP
+port: 80

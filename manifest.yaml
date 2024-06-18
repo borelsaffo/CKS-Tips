@@ -1,0 +1,48 @@
+
+
+
+Voir la section SecurityContext
+securityContexte:
+    AllowPrivilegedescalation: 
+    ReadonlyRootFileSystem:
+    userGroup:
+    userID: 65535
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bad-practices-deployment
+  labels:
+    app: bad-practices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bad-practices-app
+  template:
+    metadata:
+      labels:
+        app: bad-practices-app
+    spec:
+      hostNetwork: true          # Mauvaise pratique : Utiliser le réseau de l'hôte
+      hostPID: true              # Mauvaise pratique : Utiliser l'espace PID de l'hôte
+      hostIPC: true              # Mauvaise pratique : Utiliser l'espace IPC de l'hôte
+      containers:
+      - name: bad-practices-container
+        image: nginx:latest
+        securityContext:
+          privileged: true       # Mauvaise pratique : Exécuter le conteneur avec des privilèges élevés
+          allowPrivilegeEscalation: true # Mauvaise pratique : Permettre l'escalade de privilèges
+          capabilities:
+            add:                 # Mauvaise pratique : Ajouter des capacités supplémentaires
+              - ALL
+        volumeMounts:
+        - name: host-root
+          mountPath: /host-root  # Mauvaise pratique : Monter le système de fichiers racine de l'hôte
+          readOnly: true
+      volumes:
+      - name: host-root
+        hostPath:
+          path: /

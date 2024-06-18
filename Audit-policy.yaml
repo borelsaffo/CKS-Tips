@@ -1,0 +1,14 @@
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  # Règle pour journaliser les événements liés aux ConfigMaps et Secrets au niveau Metadata
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["configmaps", "secrets"]
+  # Règle pour journaliser les événements liés aux Pods dans le namespace 'testing' au niveau Metadata
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["pods"]
+    namespaces: ["testing"]

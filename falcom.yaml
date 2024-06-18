@@ -1,0 +1,99 @@
+
+
+
+ls /etc/falco/
+cp /etc/falco/falco_rules.yml    /etc/falco/falco_local_rules.yaml
+vi  /etc/falco/falco_local_rules.yaml
+    search if the rules exist
+    modified the rule : adapt the output 
+
+systemct status falco
+systemct start falco
+
+systemct restart falco
+systemct status falco
+
+systemct reload falco
+systemct status falco
+
+cat /var/log/syslog
+tail -f /var/log/syslog
+
+cat /var/log/syslog   | grep redis
+tail -f /var/log/syslog | grep redis
+
+       redirect de log in the files
+       edit de log file and delete the unecessery entry
+       output: %evn.time,%container.name,%user.name
+       output: "New process execution in container (command=%evt.args)"
+
+# Exemple of rule to detect process Execution in container
+       - rule: New Process Execution in Container
+         desc: Detect new process executions in the container
+         condition: container.id != host and evt.type=execve
+         output: "New process execution in container (command=%evt.args)"
+         priority: NOTICE
+         tags: [container, process]
+
+
+
+You can switch the cluster/configuration context using the following command:
+
+[desk@cli] $kubectl config use-context trace
+
+Given: You may use Sysdig or Falco documentation.
+
+Task:
+
+Use detection tools to detect anomalies like processes spawning and executing something weird frequently in the single container belonging to Podtomcat.
+
+Two tools are available to use:
+
+1. falco
+
+2. sysdig
+
+Tools are pre-installed on the worker1 node only.
+
+Analyse the container's behaviour for at least 40 seconds, using filters that detect newly spawning and executing processes.
+
+Store an incident file at/home/cert_masters/report, in the following format:
+
+[timestamp],[uid],[processName]
+
+Note:Make sure to store incident file on the cluster's worker node, don't move it to master node.
+
+AExplanation:
+$vim /etc/falco/falco_rules.local.yaml
+- rule: Container Drift Detected (open+create)
+desc: New executable created in a container due to open+create
+condition: >
+evt.type in (open,openat,creat) and
+evt.is_open_exec=true and
+container and
+not runc_writing_exec_fifo and
+not runc_writing_var_lib_docker and
+not user_known_container_drift_activities and
+evt.rawres>=0
+output: >
+%evt.time,%user.uid,%proc.name # Add this/Refer falco documentation
+priority: ERROR
+$kill -1 <PID of falco>
+Explanation
+[desk@cli] $ssh node01
+[node01@cli] $vim /etc/falco/falco_rules.yaml
+search for Container Drift Detected & paste in falco_rules.local.yaml
+[node01@cli] $vim /etc/falco/falco_rules.local.yaml
+- rule: Container Drift Detected (open+create)
+desc: New executable created in a container due to open+create
+condition: >
+evt.type in (open,openat,creat) and
+evt.is_open_exec=true and
+container and
+not runc_writing_exec_fifo and
+not runc_writing_var_lib_docker and
+not user_known_container_drift_activities and
+evt.rawres>=0
+output: >
+%evt.time,%user.uid,%proc.name # Add this/Refer falco documentation
+priority: ERROR

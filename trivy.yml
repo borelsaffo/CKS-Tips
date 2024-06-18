@@ -1,0 +1,14 @@
+
+
+in a namespace we have multiple pod.
+identified pod with image that have least vulnerability : CRITICAL, HEIGH
+
+trivy image --severity HIGH,CRITICAL nginx:1.16
+trivy image --severity HIGH,CRITICAL alpine:3.0
+
+
+trivy image  nginx:1.16 | grep CRITICAL
+trivy image  alpine:3.0 | grep CRITICAL
+
+trivy image  nginx:1.16 | grep HIGH
+trivy image  alpine:3.0 | grep HIGH
