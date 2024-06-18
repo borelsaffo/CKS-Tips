@@ -15,3 +15,7 @@ For the CK exam here are the points and concepts to focus on:
 - used trivy to scan images and remove images that are more vulnerable
 - you are given a Dockerfile and a Kubernetes manifest: make two modifications in each of the files to correct the bad practices that you will detect
 - activated the imagepolicyWebhook plugin and import admission-controler-config-file which will be provided: create the pod and check
+- we give an apparmor profile, use it to reinforce the security of the pod at the level of the Node on which it is deployed
+- immutable
+- RBAC: create role, rolebinding, clusterrole, clusterrolebinding
+- delete the user: system:anonymous
