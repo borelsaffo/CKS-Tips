@@ -1,6 +1,6 @@
 # CKS-Tips : Certified kubernetes security specialist
 
-For the CK exam here are the points and concepts to focus on:
+For the CKS exam here are the points and concepts to focus on:
 - create a serviceaccount without installing the default tokens
 - create a pod and set up a serviceaccount
 - create a runtimeClass: runsc or gvisor
